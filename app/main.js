@@ -65,7 +65,7 @@ require([
       });
   view.when(() => {
     view.ui.add("performanceInfo", "bottom-left");
-    updatePerformanceInfo();
+    //updatePerformanceInfo();
   });
   const updatePerformanceInfo = () => {
     const performanceInfo = view.performanceInfo;
