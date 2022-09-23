@@ -1,34 +1,27 @@
 require([
-  "dojo/has",
   "esri/config",
   "esri/request",
   "esri/WebScene",
-  "esri/core/watchUtils",
   "esri/layers/Layer",
   "esri/views/MapView",
   "esri/views/SceneView",
   "esri/views/support/waitForResources",
   "app/syncUtil",
-  "esri/layers/SceneLayer",
   "esri/widgets/Expand",
-  "esri/widgets/Daylight",
-], function (
-  has,
+  "esri/widgets/Daylight"
+], function(
   config,
   esriRequest,
   WebScene,
-  watchUtils,
   Layer,
   MapView,
   SceneView,
   waitForResources,
   syncUtil,
-  SceneLayer,
   Expand,
   Daylight
 ) {
   var params = {};
-  //has.add("disable-feature:single-idb-cache", 1);
   var slide2Swapkey_1 = "scene.1";
   var slide2Swapkey_2 = "scene.2";
 
@@ -38,34 +31,34 @@ require([
   }
 
   var sceneView = document.getElementById("SceneView");
-  var view = sceneView
-    ? new SceneView({
-        container: "SceneView",
-        map: webscene,
-        qualityProfile: "high",
-        environment: {
-          atmosphere: {
-            quality: "high",
-          },
-          weather: {
-            type: "cloudy",
-            cloudCover: 0.4, // autocasts as new CloudyWeather({ cloudCover: 0.4 })
-          },
-          highlightOptions: {
-            haloOpacity: 0,
-          },
+  var view = sceneView ?
+    new SceneView({
+      container: "SceneView",
+      map: webscene,
+      qualityProfile: "high",
+      environment: {
+        atmosphere: {
+          quality: "high"
         },
-      })
-    : new MapView({
-        container: "MapView",
-        map: webscene,
-        constraints: {
-          snapToZoom: false,
+        weather: {
+          type: "cloudy",
+          cloudCover: 0.4 // autocasts as new CloudyWeather({ cloudCover: 0.4 })
         },
-      });
+        highlightOptions: {
+          haloOpacity: 0
+        }
+      }
+    }) :
+    new MapView({
+      container: "MapView",
+      map: webscene,
+      constraints: {
+        snapToZoom: false
+      }
+    });
   view.when(() => {
     view.ui.add("performanceInfo", "bottom-left");
-    //updatePerformanceInfo();
+    updatePerformanceInfo();
   });
   const updatePerformanceInfo = () => {
     const performanceInfo = view.performanceInfo;
@@ -81,8 +74,8 @@ require([
   function updateMemoryTitle(used, total, quality) {
     const title = document.getElementById("title");
     title.innerHTML = `Scene Memory (Used/Available) : ${getMB(used)}MB/${getMB(
-      total
-    )}MB  -  Quality: ${Math.round(100 * quality)} %`;
+          total
+        )}MB  -  Quality: ${Math.round(100 * quality)} %`;
   }
 
   function updateTables(stats) {
@@ -92,14 +85,12 @@ require([
           <th>Memory used (MB)</th>
         </tr>`;
     for (layerInfo of stats.layerPerformanceInfos) {
-      if (
-        layerInfo.layer.type == "integrated-mesh" ||
-        layerInfo.layer.type == "3dobject"
-      ) {
+      if (layerInfo.layer.type == "integrated-mesh" ||
+        layerInfo.layer.type == "3dobject") {
         const row = document.createElement("tr");
         row.innerHTML = `<td>${
-          layerInfo.layer.title
-        }</td><td class="center">${getMB(layerInfo.memory)}</td>`;
+            layerInfo.layer.title
+          }</td><td class="center">${getMB(layerInfo.memory)}</td>`;
         tableMemoryContainer.appendChild(row);
       }
     }
@@ -154,8 +145,8 @@ require([
   const daylightExpand = new Expand({
     view: view,
     content: new Daylight({
-      view: view,
-    }),
+      view: view
+    })
   });
   view.ui.add(daylightExpand, "bottom-right");
 
@@ -175,23 +166,19 @@ require([
     switch (selectedWeather) {
       case "Sunny":
         return {
-          type: "sunny",
-          cloudCover: 0.8,
+          type: "sunny", cloudCover: 0.8
         }; // autocasts as new SunnyWeather({ cloudCover: 0.8 })
       case "Cloudy":
         return {
-          type: "cloudy",
-          cloudCover: 0.4,
+          type: "cloudy", cloudCover: 0.4
         }; // autocasts as new CloudyWeather({ cloudCover: 0.4})
       case "Rainy":
         return {
-          type: "rainy",
-          cloudCover: 0.4,
+          type: "rainy", cloudCover: 0.4
         }; // autocasts as new RainyWeather({ cloudCover: 0.4 })
       case "Foggy":
         return {
-          type: "foggy",
-          fogStrength: 0.6,
+          type: "foggy", fogStrength: 0.6
         }; // autocasts as new FoggyWeather({ fogStrength: 0.6 })
     }
   }
@@ -199,31 +186,31 @@ require([
   if (url) {
     view.map = new WebScene({
       basemap: "topo",
-      ground: "world-elevation",
+      ground: "world-elevation"
     });
     Layer.fromArcGISServerUrl({
-      url: url,
-    }).then(function (layer) {
+      url: url
+    }).then(function(layer) {
       view.map.layers.add(layer);
       layer
-        .when(function () {
+        .when(function() {
           return layer.queryExtent();
         })
-        .then(function (response) {
+        .then(function(response) {
           view.goTo(response.extent);
         });
     });
   } else {
     var webscene = params["webscene"] || "e6373629940b4e299ac3d49a08bc6856";
     if (webscene.startsWith("http")) {
-      esriRequest(webscene).then(function (json) {
+      esriRequest(webscene).then(function(json) {
         view.map = WebScene.fromJSON(json.data);
       });
     } else {
       view.map = new WebScene({
         portalItem: {
-          id: webscene,
-        },
+          id: webscene
+        }
       });
     }
   }
@@ -239,7 +226,7 @@ require([
 
   // The view must be ready (or resolved) before you can
   // access the properties of the WebScene
-  view.when(function () {
+  view.when(function() {
     var slides = view.map.presentation.slides;
     var slidesDiv = document.getElementById("slides");
     var benchmarkDiv = document.getElementById("benchmark");
@@ -270,7 +257,7 @@ require([
         slideDiv.appendChild(img);
         div.appendChild(slideDiv);
       }
-      slideDiv.addEventListener("click", function () {
+      slideDiv.addEventListener("click", function() {
         slide.applyTo(view);
         let splitslidename = slide.title.text.split("_");
         let slideid2Sync2 = slide.id;
@@ -312,7 +299,7 @@ require([
 
         start = window.performance.now();
         slides.getItemAt(current).applyTo(view, {
-          animate: false,
+          animate: false
         });
         waitForResources(view, nextSlide);
       }
@@ -321,7 +308,7 @@ require([
       return;
     }
 
-    slides.forEach(function (slide) {
+    slides.forEach(function(slide) {
       //if (slide.title.text.split("_")[1] ==  slide2Swapkey_2 &&
       //slideId2TitleMap.get(slide.title.text) == undefined) {
       addSlide(slide);
